@@ -281,6 +281,9 @@
 
   /* 算出最优的一个位置 */
   function bestStep(steps, num, who) {
+    let havenBoardStatus = [...Bot.pieces, ...Human.pieces];
+    let boardMin = boardStatus.gridBoard[0];
+    let boardMax = boardStatus.gridBoard.slice(-1)[0];
     let size = boardStatus.gridUnitCount;
     let current = who === Bot.id ? Bot.pieces : Human.pieces;
     let target, rounds, value, maxValue;
@@ -290,107 +293,147 @@
     let store = new Map();
     for (let s of steps) {
       let [x, y] = computeXY(s);
-      let min, max, minX, minY, maxX, maxY, iPosition, iFlag;
+      let min, max, minX, minY, maxX, maxY, targetX, targetY, iPosition, iFlag;
       value = 0;
       maxValue = 0;
       //水平方向
-      min = computeValue(0, y);
-      max = computeValue(size - 1, y);
-      target = computeValue(x + num - 1, y);
-      if (~current.indexOf(target)) {
-        iPosition = num - 1;
+      min = Math.max(computeValue(0, y), boardMin);
+      max = Math.min(computeValue(size - 1, y), boardMax);
+      targetX = Math.min(x + num - 1, size - 1);
+      target = computeValue(targetX, y);
+      if (target >= min && target <= max && ~current.indexOf(target)) {
+        iPosition = num - 2;
         iFlag = true;
         while (iPosition > 0 && iFlag) {
-          iFlag = ~current.indexOf(computeValue(x + num - 1 - iPosition, y));
+          iFlag = ~current.indexOf(computeValue(targetX - iPosition, y));
           iPosition = iPosition - 1;
         }
         if (iFlag) {
+          value = 0;
           rounds =
             stepRound(target)
-              .map(v => computeValue(v))
+              .map(([x, y]) => computeValue(x, y))
               .filter(v => ~current.indexOf(v)).length + 1;
           let left = computeValue(x - 1, y);
-          let right = computeValue(x + num - 1 + 1, y);
+          let right = computeValue(targetX + 1, y);
           if (left >= min) {
-            value = 1;
+            if (~current.indexOf(left)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(left)) {
+              value += 1;
+            }
           }
           if (right <= max) {
-            value = 2;
+            if (~current.indexOf(right)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(right)) {
+              value += 1;
+            }
           }
           maxValue = Math.max(maxValue, value * rounds);
         }
       }
-      target = computeValue(x - num + 1, y);
-      if (~current.indexOf(target)) {
-        iPosition = num - 1;
+      targetX = Math.max(0, x - num + 1);
+      target = computeValue(targetX, y);
+      if (target >= min && target <= max && ~current.indexOf(target)) {
+        iPosition = num - 2;
         iFlag = true;
         while (iPosition > 0 && iFlag) {
-          iFlag = ~current.indexOf(computeValue(x - num + 1 + iPosition, y));
+          iFlag = ~current.indexOf(computeValue(targetX + iPosition, y));
           iPosition = iPosition - 1;
         }
         if (iFlag) {
+          value = 0;
           rounds =
             stepRound(target)
-              .map(v => computeValue(v))
+              .map(([x, y]) => computeValue(x, y))
               .filter(v => ~current.indexOf(v)).length + 1;
-          let left = computeValue(x - num + 1 - 1, y);
+          let left = computeValue(targetX - 1, y);
           let right = computeValue(x + 1, y);
           if (left >= min) {
-            value = 1;
+            if (~current.indexOf(left)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(left)) {
+              value += 1;
+            }
           }
           if (right <= max) {
-            value = 2;
+            if (~current.indexOf(right)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(right)) {
+              value += 1;
+            }
           }
           maxValue = Math.max(maxValue, value * rounds);
         }
       }
       //垂直方向
-      min = computeValue(x, 0);
-      max = computeValue(x, size - 1);
-      target = computeValue(x, y + num - 1);
-      if (~current.indexOf(target)) {
-        iPosition = num - 1;
+      min = Math.max(computeValue(x, 0), boardMin);
+      max = Math.min(computeValue(x, size - 1), boardMax);
+      targetY = Math.min(size - 1, y + num - 1);
+      target = computeValue(x, targetY);
+      if (target >= min && target <= max && ~current.indexOf(target)) {
+        iPosition = num - 2;
         iFlag = true;
         while (iPosition > 0 && iFlag) {
-          iFlag = ~current.indexOf(computeValue(x, y + num - 1 - iPosition));
+          iFlag = ~current.indexOf(computeValue(x, targetY - iPosition));
           iPosition = iPosition - 1;
         }
         if (iFlag) {
+          value = 0;
           rounds =
             stepRound(target)
-              .map(v => computeValue(v))
+              .map(([x, y]) => computeValue(x, y))
               .filter(v => ~current.indexOf(v)).length + 1;
           let up = computeValue(x, y - 1);
-          let down = computeValue(x, y + num - 1 + 1);
+          let down = computeValue(x, targetY + 1);
           if (up >= min) {
-            value = 1;
+            if (~current.indexOf(up)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(up)) {
+              value += 1;
+            }
           }
           if (down <= max) {
-            value = 2;
+            if (~current.indexOf(down)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(down)) {
+              value += 1;
+            }
           }
           maxValue = Math.max(maxValue, value * rounds);
         }
       }
-      target = computeValue(x, y - num + 1);
-      if (~current.indexOf(target)) {
-        iPosition = num - 1;
+      targetY = Math.max(y - num + 1, 0);
+      target = computeValue(x, targetY);
+      if (target >= min && target <= max && ~current.indexOf(target)) {
+        iPosition = num - 2;
         iFlag = true;
         while (iPosition > 0 && iFlag) {
-          iFlag = ~current.indexOf(computeValue(x, y - num + 1 + iPosition));
+          iFlag = ~current.indexOf(computeValue(x, targetY + iPosition));
           iPosition = iPosition - 1;
         }
         if (iFlag) {
+          value = 0;
           rounds =
             stepRound(target)
-              .map(v => computeValue(v))
+              .map(([x, y]) => computeValue(x, y))
               .filter(v => ~current.indexOf(v)).length + 1;
-          let up = computeValue(x, y - num + 1 - 1);
+          let up = computeValue(x, targetY - 1);
           let down = computeValue(x, y + 1);
           if (up >= min) {
-            value = 1;
+            if (~current.indexOf(up)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(up)) {
+              value += 1;
+            }
           }
           if (down <= max) {
-            value = 2;
+            if (~current.indexOf(down)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(down)) {
+              value += 1;
+            }
           }
           maxValue = Math.max(maxValue, value * rounds);
         }
@@ -398,54 +441,76 @@
       //45度方向
       minX = Math.min(size - 1, x + y);
       minY = y - (minX - x);
-      min = computeValue(minX, minY);
+      min = Math.max(computeValue(minX, minY), boardMin);
       maxY = Math.min(size - 1, x + y);
       maxX = x - (maxY - y);
-      max = computeValue(maxX, maxY);
-      target = computeValue(x - num + 1, y + num + 1);
-      if (~current.indexOf(target)) {
-        iPosition = num - 1;
+      max = Math.min(computeValue(maxX, maxY), boardMax);
+      targetX = Math.max(0, x - num + 1);
+      targetY = Math.min(size - 1, y + num - 1);
+      target = computeValue(targetX, targetY);
+      if (target >= min && target <= max && ~current.indexOf(target)) {
+        iPosition = num - 2;
         iFlag = true;
         while (iPosition > 0 && iFlag) {
-          iFlag = ~current.indexOf(computeValue(x - num + 1 + iPosition, y + num + 1 - iPosition));
+          iFlag = ~current.indexOf(computeValue(targetX + iPosition, targetY - iPosition));
           iPosition = iPosition - 1;
         }
         if (iFlag) {
+          value = 0;
           rounds =
             stepRound(target)
-              .map(v => computeValue(v))
+              .map(([x, y]) => computeValue(x, y))
               .filter(v => ~current.indexOf(v)).length + 1;
           let rightUp = computeValue(x + 1, y + 1);
-          let leftDown = computeValue(x - num + 1 - 1, y + num + 1 - 1);
-          if (up >= min) {
-            value = 1;
+          let leftDown = computeValue(targetX - 1, targetY - 1);
+          if (rightUp >= min) {
+            if (~current.indexOf(rightUp)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(rightUp)) {
+              value += 1;
+            }
           }
-          if (down <= max) {
-            value = 2;
+          if (leftDown <= max) {
+            if (~current.indexOf(leftDown)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(leftDown)) {
+              value += 1;
+            }
           }
           maxValue = Math.max(maxValue, value * rounds);
         }
       }
-      target = computeValue(x + num - 1, y - num + 1);
-      if (~current.indexOf(target)) {
-        iPosition = num - 1;
+      targetX = Math.min(size - 1, x + num - 1);
+      targetY = Math.max(0, y - num + 1);
+      target = computeValue(targetX, targetY);
+      if (target >= min && target <= max && ~current.indexOf(target)) {
+        iPosition = num - 2;
         iFlag = true;
         while (iPosition > 0 && iFlag) {
-          iFlag = ~current.indexOf(computeValue(x + num - 1 - iPosition, y - num + 1 + iPosition));
+          iFlag = ~current.indexOf(computeValue(targetX - iPosition, targetY + iPosition));
           iPosition = iPosition - 1;
         }
         if (iFlag) {
+          value = 0;
           rounds =
             stepRound(target)
-              .map(v => computeValue(v))
+              .map(([x, y]) => computeValue(x, y))
               .filter(v => ~current.indexOf(v)).length + 1;
-          let rightUp = computeValue(x + num - 1 + 1, y - num + 1 - 1);
+          let rightUp = computeValue(targetX + 1, targetY - 1);
           let leftDown = computeValue(x - 1, y + 1);
           if (rightUp >= min) {
-            value = 1;
+            if (~current.indexOf(rightUp)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(rightUp)) {
+              value += 1;
+            }
           }
           if (leftDown <= max) {
-            value = 2;
+            if (~current.indexOf(leftDown)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(leftDown)) {
+              value += 1;
+            }
           }
           maxValue = Math.max(maxValue, value * rounds);
         }
@@ -453,61 +518,83 @@
       //135度方向
       minX = Math.max(0, x - y);
       minY = y - (x - minX);
-      min = computeValue(minX, minY);
+      min = Math.max(computeValue(minX, minY), boardMin);
       maxX = Math.min(size - 1, x + size - y);
       maxY = y + (maxX - x);
-      max = computeValue(maxX, maxY);
-      target = computeValue(x + num - 1, y + num - 1);
-      if (~current.indexOf(target)) {
-        iPosition = num - 1;
+      max = Math.min(computeValue(maxX, maxY), boardMax);
+      targetX = Math.min(size - 1, x + num - 1);
+      targetY = Math.min(size - 1, y + num - 1);
+      target = computeValue(targetX, targetY);
+      if (target >= min && target <= max && ~current.indexOf(target)) {
+        iPosition = num - 2;
         iFlag = true;
         while (iPosition > 0 && iFlag) {
-          iFlag = ~current.indexOf(computeValue(x + num - 1 - iPosition, y + num - 1 - iPosition));
+          iFlag = ~current.indexOf(computeValue(targetX - iPosition, targetY - iPosition));
           iPosition = iPosition - 1;
         }
         if (iFlag) {
+          value = 0;
           rounds =
             stepRound(target)
-              .map(v => computeValue(v))
+              .map(([x, y]) => computeValue(x, y))
               .filter(v => ~current.indexOf(v)).length + 1;
           let leftUp = computeValue(x - 1, y - 1);
-          let rightDown = computeValue(x + num - 1 + 1, y + num - 1 + 1);
+          let rightDown = computeValue(targetX + 1, targetY + 1);
           if (leftUp >= min) {
-            value = 1;
+            if (~current.indexOf(leftUp)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(leftUp)) {
+              value += 1;
+            }
           }
           if (rightDown <= max) {
-            value = 2;
+            if (~current.indexOf(rightDown)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(rightDown)) {
+              value += 1;
+            }
           }
           maxValue = Math.max(maxValue, value * rounds);
         }
       }
-      target = computeValue(x - num + 1, y - num + 1);
-      if (~current.indexOf(target)) {
-        iPosition = num - 1;
+      targetX = Math.max(0, x - num + 1);
+      targetY = Math.max(0, y - num + 1);
+      target = computeValue(targetX, targetY);
+      if (target >= min && target <= max && ~current.indexOf(target)) {
+        iPosition = num - 2;
         iFlag = true;
         while (iPosition > 0 && iFlag) {
-          iFlag = ~current.indexOf(computeValue(x - num + 1 + iPosition, y - num + 1 + iPosition));
+          iFlag = ~current.indexOf(computeValue(targetX + iPosition, targetY + iPosition));
           iPosition = iPosition - 1;
         }
         if (iFlag) {
+          value = 0;
           rounds =
             stepRound(target)
-              .map(v => computeValue(v))
+              .map(([x, y]) => computeValue(x, y))
               .filter(v => ~current.indexOf(v)).length + 1;
-          let leftUp = computeValue(x - num + 1 - 1, y - num + 1 - 1);
+          let leftUp = computeValue(targetX - 1, targetY - 1);
           let rightDown = computeValue(x + 1, y + 1);
           if (leftUp >= min) {
-            value = 1;
+            if (~current.indexOf(leftUp)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(leftUp)) {
+              value += 1;
+            }
           }
           if (rightDown <= max) {
-            value = 2;
+            if (~current.indexOf(rightDown)) {
+              value += 10;
+            } else if (!~havenBoardStatus.indexOf(rightDown)) {
+              value += 1;
+            }
           }
           maxValue = Math.max(maxValue, value * rounds);
         }
       }
       store.set(s, maxValue);
     }
-    let r = Array.from(store);
+    let r = Array.from(store).filter(([k, s]) => s > 0);
     if (r.length) {
       return r.sort((a, b) => a[1] < b[1])[0][0];
     }
