@@ -183,49 +183,335 @@
     havenBoardStatus = [...Bot.pieces, ...Human.pieces];
     let botCanSteps = getCanWinStep(Bot.id);
     let humanCanSteps = getCanWinStep(Human.id);
-    //机器人可以成五的棋
+    let botId = Bot.id;
+    let humanId = Human.id;
+    let botCanFive = [],
+      botCanFour = [],
+      botCanThree = [],
+      botCanTow = [];
+    let humanCanFive = [],
+      humanCanFour = [],
+      humanCanThree = [],
+      humanCanTow = [];
+
     for (let s of botCanSteps) {
-      if (isWinOver(Bot.id, s, 5)) {
-        return s;
+      if (isWinOver(botId, s, 5)) {
+        //机器人可以成五的棋
+        botCanFive.push(s);
+      } else if (isWinOver(botId, s, 4)) {
+        //机器人可以成四的棋
+        botCanFour.push(s);
+      } else if (isWinOver(botId, s, 3)) {
+        //机器人可以成三的棋
+        botCanThree.push(s);
+      } else if (isWinOver(botId, s, 2)) {
+        //机器人可以成二的棋
+        botCanTow.push(s);
       }
     }
-    //人类可以成五的棋
+
     for (let s of humanCanSteps) {
-      if (isWinOver(Human.id, s, 5)) {
-        return s;
+      if (isWinOver(humanId, s, 5)) {
+        //人类可以成五的棋
+        humanCanFive.push(s);
+      } else if (isWinOver(humanId, s, 4)) {
+        //人类可以成四的棋
+        humanCanFour.push(s);
+      } else if (isWinOver(humanId, s, 3)) {
+        //人类可以成三的棋
+        humanCanThree.push(s);
+      } else if (isWinOver(humanId, s, 2)) {
+        //人类可以成二的棋
+        humanCanTow.push(s);
       }
     }
-    //机器人可以成四的棋
-    for (let s of botCanSteps) {
-      if (isWinOver(Bot.id, s, 4)) {
-        return s;
+    //自己能成五，则成五
+    if (botCanFive.length) {
+      return botCanFive[0];
+    }
+    //阻止人类成五
+    if (humanCanFive.length) {
+      return humanCanFive[0];
+    }
+    //自己能成四，则成四
+    if (botCanFour.length) {
+      let best = bestStep(botCanFour, 4, botId);
+      if (best) {
+        return best;
       }
     }
-    //人类可以成四的棋
-    for (let s of humanCanSteps) {
-      if (isWinOver(Human.id, s, 4)) {
-        return s;
+    //阻止人类成四
+    if (humanCanFour.length) {
+      let best = bestStep(humanCanFour, 4, humanId);
+      if (best) {
+        return best;
       }
     }
-    //否则，围剿对方
-    let lastHumanStep = Human.pieces.slice(-1)[0];
-    let lastHumanStepXY = computeXY(lastHumanStep);
-    let canSteps = stepRound(lastHumanStep);
-    for (let s of canSteps) {
-      let value = computeValue(s[0], s[1]);
-      if (~Human.pieces.indexOf(value)) {
-        let tx = lastHumanStepXY[0] - s[0] + lastHumanStepXY[0];
-        let ty = lastHumanStepXY[1] - s[1] + lastHumanStepXY[1];
-        let tValue = computeValue(tx, ty);
-        if (!~havenBoardStatus.indexOf(tValue)) {
-          return tValue;
-        }
-      } else if (!~havenBoardStatus.indexOf(value)) {
-        return value;
+    //自己能成三，则成三
+    if (botCanThree.length) {
+      let best = bestStep(botCanThree, 3, botId);
+      if (best) {
+        return best;
       }
     }
-    //否则，随机走一步可以走的棋
+    //阻止人类成三
+    if (humanCanThree.length) {
+      let best = bestStep(humanCanThree, 3, humanId);
+      if (best) {
+        return best;
+      }
+    }
+    //自己能成二，则成二
+    if (botCanTow.length) {
+      let best = bestStep(botCanTow, 2, botId);
+      if (best) {
+        return best;
+      }
+    }
+    //阻止人类成二
+    if (humanCanTow.length) {
+      let best = bestStep(humanCanTow, 2, humanId);
+      if (best) {
+        return best;
+      }
+    }
+    //否则，随机走一步可以走的棋子
     return botCanSteps[getRandom(0, botCanSteps.length - 1)];
+  }
+
+  /* 算出最优的一个位置 */
+  function bestStep(steps, num, who) {
+    let size = boardStatus.gridUnitCount;
+    let current = who === Bot.id ? Bot.pieces : Human.pieces;
+    let target, rounds, value, maxValue;
+    if (!Array.isArray(steps) || !steps.length) {
+      return null;
+    }
+    let store = new Map();
+    for (let s of steps) {
+      let [x, y] = computeXY(s);
+      let min, max, minX, minY, maxX, maxY, iPosition, iFlag;
+      value = 0;
+      maxValue = 0;
+      //水平方向
+      min = computeValue(0, y);
+      max = computeValue(size - 1, y);
+      target = computeValue(x + num - 1, y);
+      if (~current.indexOf(target)) {
+        iPosition = num - 1;
+        iFlag = true;
+        while (iPosition > 0 && iFlag) {
+          iFlag = ~current.indexOf(computeValue(x + num - 1 - iPosition, y));
+          iPosition = iPosition - 1;
+        }
+        if (iFlag) {
+          rounds =
+            stepRound(target)
+              .map(v => computeValue(v))
+              .filter(v => ~current.indexOf(v)).length + 1;
+          let left = computeValue(x - 1, y);
+          let right = computeValue(x + num - 1 + 1, y);
+          if (left >= min) {
+            value = 1;
+          }
+          if (right <= max) {
+            value = 2;
+          }
+          maxValue = Math.max(maxValue, value * rounds);
+        }
+      }
+      target = computeValue(x - num + 1, y);
+      if (~current.indexOf(target)) {
+        iPosition = num - 1;
+        iFlag = true;
+        while (iPosition > 0 && iFlag) {
+          iFlag = ~current.indexOf(computeValue(x - num + 1 + iPosition, y));
+          iPosition = iPosition - 1;
+        }
+        if (iFlag) {
+          rounds =
+            stepRound(target)
+              .map(v => computeValue(v))
+              .filter(v => ~current.indexOf(v)).length + 1;
+          let left = computeValue(x - num + 1 - 1, y);
+          let right = computeValue(x + 1, y);
+          if (left >= min) {
+            value = 1;
+          }
+          if (right <= max) {
+            value = 2;
+          }
+          maxValue = Math.max(maxValue, value * rounds);
+        }
+      }
+      //垂直方向
+      min = computeValue(x, 0);
+      max = computeValue(x, size - 1);
+      target = computeValue(x, y + num - 1);
+      if (~current.indexOf(target)) {
+        iPosition = num - 1;
+        iFlag = true;
+        while (iPosition > 0 && iFlag) {
+          iFlag = ~current.indexOf(computeValue(x, y + num - 1 - iPosition));
+          iPosition = iPosition - 1;
+        }
+        if (iFlag) {
+          rounds =
+            stepRound(target)
+              .map(v => computeValue(v))
+              .filter(v => ~current.indexOf(v)).length + 1;
+          let up = computeValue(x, y - 1);
+          let down = computeValue(x, y + num - 1 + 1);
+          if (up >= min) {
+            value = 1;
+          }
+          if (down <= max) {
+            value = 2;
+          }
+          maxValue = Math.max(maxValue, value * rounds);
+        }
+      }
+      target = computeValue(x, y - num + 1);
+      if (~current.indexOf(target)) {
+        iPosition = num - 1;
+        iFlag = true;
+        while (iPosition > 0 && iFlag) {
+          iFlag = ~current.indexOf(computeValue(x, y - num + 1 + iPosition));
+          iPosition = iPosition - 1;
+        }
+        if (iFlag) {
+          rounds =
+            stepRound(target)
+              .map(v => computeValue(v))
+              .filter(v => ~current.indexOf(v)).length + 1;
+          let up = computeValue(x, y - num + 1 - 1);
+          let down = computeValue(x, y + 1);
+          if (up >= min) {
+            value = 1;
+          }
+          if (down <= max) {
+            value = 2;
+          }
+          maxValue = Math.max(maxValue, value * rounds);
+        }
+      }
+      //45度方向
+      minX = Math.min(size - 1, x + y);
+      minY = y - (minX - x);
+      min = computeValue(minX, minY);
+      maxY = Math.min(size - 1, x + y);
+      maxX = x - (maxY - y);
+      max = computeValue(maxX, maxY);
+      target = computeValue(x - num + 1, y + num + 1);
+      if (~current.indexOf(target)) {
+        iPosition = num - 1;
+        iFlag = true;
+        while (iPosition > 0 && iFlag) {
+          iFlag = ~current.indexOf(computeValue(x - num + 1 + iPosition, y + num + 1 - iPosition));
+          iPosition = iPosition - 1;
+        }
+        if (iFlag) {
+          rounds =
+            stepRound(target)
+              .map(v => computeValue(v))
+              .filter(v => ~current.indexOf(v)).length + 1;
+          let rightUp = computeValue(x + 1, y + 1);
+          let leftDown = computeValue(x - num + 1 - 1, y + num + 1 - 1);
+          if (up >= min) {
+            value = 1;
+          }
+          if (down <= max) {
+            value = 2;
+          }
+          maxValue = Math.max(maxValue, value * rounds);
+        }
+      }
+      target = computeValue(x + num - 1, y - num + 1);
+      if (~current.indexOf(target)) {
+        iPosition = num - 1;
+        iFlag = true;
+        while (iPosition > 0 && iFlag) {
+          iFlag = ~current.indexOf(computeValue(x + num - 1 - iPosition, y - num + 1 + iPosition));
+          iPosition = iPosition - 1;
+        }
+        if (iFlag) {
+          rounds =
+            stepRound(target)
+              .map(v => computeValue(v))
+              .filter(v => ~current.indexOf(v)).length + 1;
+          let rightUp = computeValue(x + num - 1 + 1, y - num + 1 - 1);
+          let leftDown = computeValue(x - 1, y + 1);
+          if (rightUp >= min) {
+            value = 1;
+          }
+          if (leftDown <= max) {
+            value = 2;
+          }
+          maxValue = Math.max(maxValue, value * rounds);
+        }
+      }
+      //135度方向
+      minX = Math.max(0, x - y);
+      minY = y - (x - minX);
+      min = computeValue(minX, minY);
+      maxX = Math.min(size - 1, x + size - y);
+      maxY = y + (maxX - x);
+      max = computeValue(maxX, maxY);
+      target = computeValue(x + num - 1, y + num - 1);
+      if (~current.indexOf(target)) {
+        iPosition = num - 1;
+        iFlag = true;
+        while (iPosition > 0 && iFlag) {
+          iFlag = ~current.indexOf(computeValue(x + num - 1 - iPosition, y + num - 1 - iPosition));
+          iPosition = iPosition - 1;
+        }
+        if (iFlag) {
+          rounds =
+            stepRound(target)
+              .map(v => computeValue(v))
+              .filter(v => ~current.indexOf(v)).length + 1;
+          let leftUp = computeValue(x - 1, y - 1);
+          let rightDown = computeValue(x + num - 1 + 1, y + num - 1 + 1);
+          if (leftUp >= min) {
+            value = 1;
+          }
+          if (rightDown <= max) {
+            value = 2;
+          }
+          maxValue = Math.max(maxValue, value * rounds);
+        }
+      }
+      target = computeValue(x - num + 1, y - num + 1);
+      if (~current.indexOf(target)) {
+        iPosition = num - 1;
+        iFlag = true;
+        while (iPosition > 0 && iFlag) {
+          iFlag = ~current.indexOf(computeValue(x - num + 1 + iPosition, y - num + 1 + iPosition));
+          iPosition = iPosition - 1;
+        }
+        if (iFlag) {
+          rounds =
+            stepRound(target)
+              .map(v => computeValue(v))
+              .filter(v => ~current.indexOf(v)).length + 1;
+          let leftUp = computeValue(x - num + 1 - 1, y - num + 1 - 1);
+          let rightDown = computeValue(x + 1, y + 1);
+          if (leftUp >= min) {
+            value = 1;
+          }
+          if (rightDown <= max) {
+            value = 2;
+          }
+          maxValue = Math.max(maxValue, value * rounds);
+        }
+      }
+      store.set(s, maxValue);
+    }
+    let r = Array.from(store);
+    if (r.length) {
+      return r.sort((a, b) => a[1] < b[1])[0][0];
+    }
+    return null;
   }
 
   /* 判断是否胜利，结束 */
@@ -314,6 +600,23 @@
       }
     }
     return false;
+  }
+
+  /* 计算权重 */
+  function computeWeight(x, y, num) {
+    let value = 0;
+    let size = boardStatus.gridUnitCount;
+    let min = computeValue(0, y);
+    let max = computeValue(size - 1, y);
+    let left = computeValue(x - 1, y);
+    let right = computeValue(x + num - 1 + 1, y);
+    if (left >= min) {
+      value = value + 1;
+    }
+    if (right <= max) {
+      value = value + 1;
+    }
+    return value;
   }
 
   /* 该棋子四周坐标 */
