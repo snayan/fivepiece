@@ -98,7 +98,7 @@
   function winOver(who) {
     //who:0表示白棋，1表示黑棋
     let winner = document.createElement('p');
-    winner.textContent = (who === 0 ? '白棋' : '黑棋') + '获胜！';
+    winner.textContent = (who === 0 ? '恭喜你，获胜！' : '哈哈，愚蠢的你，输了！') + '';
     winner.className = 'win_txt';
     let reStart = document.createElement('button');
     reStart.textContent = '重新开始';
