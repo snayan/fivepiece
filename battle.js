@@ -247,13 +247,6 @@
         return best;
       }
     }
-    //自己能成三，则成三
-    if (botCanThree.length) {
-      let best = bestStep(botCanThree, 3, botId);
-      if (best) {
-        return best;
-      }
-    }
     //阻止人类成三
     if (humanCanThree.length) {
       let best = bestStep(humanCanThree, 3, humanId);
@@ -261,9 +254,9 @@
         return best;
       }
     }
-    //自己能成二，则成二
-    if (botCanTow.length) {
-      let best = bestStep(botCanTow, 2, botId);
+    //自己能成三，则成三
+    if (botCanThree.length) {
+      let best = bestStep(botCanThree, 3, botId);
       if (best) {
         return best;
       }
@@ -271,6 +264,13 @@
     //阻止人类成二
     if (humanCanTow.length) {
       let best = bestStep(humanCanTow, 2, humanId);
+      if (best) {
+        return best;
+      }
+    }
+    //自己能成二，则成二
+    if (botCanTow.length) {
+      let best = bestStep(botCanTow, 2, botId);
       if (best) {
         return best;
       }
