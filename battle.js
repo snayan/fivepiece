@@ -168,7 +168,7 @@
         b.View.winOver(WHO);
         return true;
       }
-      if (Bot.pieces.length === boardStatus.length / 2) {
+      if (Bot.pieces.length === boardStatus.gridBoard.length / 2) {
         //平局
         b.View.drawOver();
         return true;
@@ -235,43 +235,43 @@
     }
     //自己能成四，则成四
     if (botCanFour.length) {
-      let best = bestStep(botCanFour.filter(v => isWinOver(botId, v, 5, true)), 4, botId);
-      if (best) {
+      let best = bestStep(botCanFour.filter(v => canWinOver(botId, v, 4)), 4, botId);
+      if (best != null) {
         return best;
       }
     }
     //阻止人类成四
     if (humanCanFour.length) {
-      let best = bestStep(humanCanFour.filter(v => isWinOver(humanId, v, 5, true)), 4, humanId);
-      if (best) {
+      let best = bestStep(humanCanFour.filter(v => canWinOver(humanId, v, 4)), 4, humanId);
+      if (best != null) {
         return best;
       }
     }
     //阻止人类成三
     if (humanCanThree.length) {
-      let best = bestStep(humanCanThree.filter(v => isWinOver(humanId, v, 5, true)), 3, humanId);
-      if (best) {
+      let best = bestStep(humanCanThree.filter(v => canWinOver(humanId, v, 3)), 3, humanId);
+      if (best != null) {
         return best;
       }
     }
     //自己能成三，则成三
     if (botCanThree.length) {
-      let best = bestStep(botCanThree.filter(v => isWinOver(botId, v, 5, true)), 3, botId);
-      if (best) {
+      let best = bestStep(botCanThree.filter(v => canWinOver(botId, v, 3)), 3, botId);
+      if (best != null) {
         return best;
       }
     }
     //阻止人类成二
     if (humanCanTow.length) {
-      let best = bestStep(humanCanTow.filter(v => isWinOver(humanId, v, 5, true)), 2, humanId);
-      if (best) {
+      let best = bestStep(humanCanTow.filter(v => canWinOver(humanId, v, 2)), 2, humanId);
+      if (best != null) {
         return best;
       }
     }
     //自己能成二，则成二
     if (botCanTow.length) {
-      let best = bestStep(botCanTow.filter(v => isWinOver(botId, v, 5, true)), 2, botId);
-      if (best) {
+      let best = bestStep(botCanTow.filter(v => canWinOver(botId, v, 2)), 2, botId);
+      if (best != null) {
         return best;
       }
     }
@@ -332,7 +332,7 @@
                 value += 1;
               }
             }
-            maxValue = Math.max(maxValue, value * rounds);
+            maxValue = Math.max(maxValue, value + rounds);
           }
         }
         iIndex = iIndex - 1;
@@ -370,7 +370,7 @@
                 value += 1;
               }
             }
-            maxValue = Math.max(maxValue, value * rounds);
+            maxValue = Math.max(maxValue, value + rounds);
           }
         }
         iIndex = iIndex - 1;
@@ -412,7 +412,7 @@
                 value += 1;
               }
             }
-            maxValue = Math.max(maxValue, value * rounds);
+            maxValue = Math.max(maxValue, value + rounds);
           }
         }
         iIndex = iIndex - 1;
@@ -450,7 +450,7 @@
                 value += 1;
               }
             }
-            maxValue = Math.max(maxValue, value * rounds);
+            maxValue = Math.max(maxValue, value + rounds);
           }
         }
         iIndex = iIndex - 1;
@@ -497,7 +497,7 @@
                 value += 1;
               }
             }
-            maxValue = Math.max(maxValue, value * rounds);
+            maxValue = Math.max(maxValue, value + rounds);
           }
         }
         iIndex = iIndex - 1;
@@ -536,7 +536,7 @@
                 value += 1;
               }
             }
-            maxValue = Math.max(maxValue, value * rounds);
+            maxValue = Math.max(maxValue, value + rounds);
           }
         }
         iIndex = iIndex - 1;
@@ -583,7 +583,7 @@
                 value += 1;
               }
             }
-            maxValue = Math.max(maxValue, value * rounds);
+            maxValue = Math.max(maxValue, value + rounds);
           }
         }
         iIndex = iIndex - 1;
@@ -622,7 +622,7 @@
                 value += 1;
               }
             }
-            maxValue = Math.max(maxValue, value * rounds);
+            maxValue = Math.max(maxValue, value + rounds);
           }
         }
         iIndex = iIndex - 1;
@@ -638,14 +638,13 @@
   }
 
   /* 判断是否胜利，结束 */
-  function isWinOver(who, step, num, canWinOver = false) {
+  function isWinOver(who, step, num) {
     let havenBoardStatus = [...Bot.pieces, ...Human.pieces];
     let size = boardStatus.gridUnitCount;
     let current = who === Human.id ? Human : Bot;
-    if (!canWinOver && current.pieces.length < num - 1) {
+    if (current.pieces.length < num - 1) {
       return false;
     }
-    let isWin = false;
     let [currentX, currentY] = computeXY(step);
     //水平方向
     for (let i = 0; i < num; i++) {
@@ -657,11 +656,7 @@
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
           .map(v => computeValue(x + v, y))
-          .filter(
-            v =>
-              v === step ||
-              (v >= min && v <= max && (~current.pieces.indexOf(v) || (canWinOver && !~havenBoardStatus.indexOf(v))))
-          );
+          .filter(v => v === step || (v >= min && v <= max && ~current.pieces.indexOf(v)));
         if (hSteps.length === num) {
           //胜利
           return true;
@@ -678,11 +673,7 @@
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
           .map(v => computeValue(x, y + v))
-          .filter(
-            v =>
-              v === step ||
-              (v >= min && v <= max && (~current.pieces.indexOf(v) || (canWinOver && !~havenBoardStatus.indexOf(v))))
-          );
+          .filter(v => v === step || (v >= min && v <= max && ~current.pieces.indexOf(v)));
         if (hSteps.length === num) {
           //胜利
           return true;
@@ -694,20 +685,16 @@
       let x = currentX + i;
       let y = currentY - i;
       let minX = Math.min(size - 1, currentX + currentY);
-      let minY = currentY - (minX - currentX);
+      let minY = Math.max(0, currentY - (minX - currentX));
       let min = computeValue(minX, minY);
       let maxY = Math.min(size - 1, currentX + currentY);
-      let maxX = currentX - (maxY - currentY);
+      let maxX = Math.max(0, currentX - (maxY - currentY));
       let max = computeValue(maxX, maxY);
       if (y >= 0 && x <= size - 1) {
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
           .map(v => computeValue(x - v, y + v))
-          .filter(
-            v =>
-              v === step ||
-              (v >= min && v <= max && (~current.pieces.indexOf(v) || (canWinOver && !~havenBoardStatus.indexOf(v))))
-          );
+          .filter(v => v === step || (v >= min && v <= max && ~current.pieces.indexOf(v)));
         if (hSteps.length === num) {
           //胜利
           return true;
@@ -719,21 +706,134 @@
       let x = currentX - i;
       let y = currentY - i;
       let minX = Math.max(0, currentX - currentY);
-      let minY = currentY - (currentX - minX);
+      let minY = Math.max(0, currentY - (currentX - minX));
       let min = computeValue(minX, minY);
       let maxX = Math.min(size - 1, currentX + size - currentY);
-      let maxY = currentY + (maxX - currentX);
+      let maxY = Math.min(size - 1, currentY + (maxX - currentX));
       let max = computeValue(maxX, maxY);
       if (y >= 0 && x >= 0) {
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
           .map(v => computeValue(x + v, y + v))
-          .filter(
-            v =>
-              v === step ||
-              (v >= min && v <= max && (~current.pieces.indexOf(v) || (canWinOver && !~havenBoardStatus.indexOf(v))))
-          );
+          .filter(v => v === step || (v >= min && v <= max && ~current.pieces.indexOf(v)));
         if (hSteps.length === num) {
+          //胜利
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /* 判断该子能否为以后提供胜利的基础 */
+  function canWinOver(who, step, num) {
+    let size = boardStatus.gridUnitCount;
+    let current = who === Human.id ? Human : Bot;
+    let others = who === Human.id ? Bot : Human;
+    let [currentX, currentY] = computeXY(step);
+    //水平方向
+    for (let i = 0; i < 5; i++) {
+      let x = currentX - i;
+      let y = currentY;
+      let min = computeValue(0, currentY);
+      let max = computeValue(size - 1, currentY);
+      if (x >= 0) {
+        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x + v, y)).filter((v, i) => {
+          if (v === step) {
+            return true;
+          }
+          let r = v >= min && v <= max;
+          if (i < num) {
+            r = r && ~current.pieces.indexOf(v);
+          } else {
+            r = r && !~others.pieces.indexOf(v);
+          }
+          return r;
+        });
+        if (hSteps.length === 5) {
+          //胜利
+          return true;
+        }
+      }
+    }
+    //垂直方向
+    for (let i = 0; i < 5; i++) {
+      let x = currentX;
+      let y = currentY - i;
+      let min = computeValue(currentX, 0);
+      let max = computeValue(currentX, size - 1);
+      if (y >= 0) {
+        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x, y + v)).filter((v, i) => {
+          if (v === step) {
+            return true;
+          }
+          let r = v >= min && v <= max;
+          if (i < num) {
+            r = r && ~current.pieces.indexOf(v);
+          } else {
+            r = r && !~others.pieces.indexOf(v);
+          }
+          return r;
+        });
+        if (hSteps.length === 5) {
+          //胜利
+          return true;
+        }
+      }
+    }
+    //45度方向
+    for (let i = 0; i < 5; i++) {
+      let x = currentX + i;
+      let y = currentY - i;
+      let minX = Math.min(size - 1, currentX + currentY);
+      let minY = Math.max(0, currentY - (minX - currentX));
+      let min = computeValue(minX, minY);
+      let maxY = Math.min(size - 1, currentX + currentY);
+      let maxX = Math.max(0, currentX - (maxY - currentY));
+      let max = computeValue(maxX, maxY);
+      if (y >= 0 && x <= size - 1) {
+        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x - v, y + v)).filter((v, i) => {
+          if (v === step) {
+            return true;
+          }
+          let r = v >= min && v <= max;
+          if (i < num) {
+            r = r && ~current.pieces.indexOf(v);
+          } else {
+            r = r && !~others.pieces.indexOf(v);
+          }
+          return r;
+        });
+        if (hSteps.length === 5) {
+          //胜利
+          return true;
+        }
+      }
+    }
+    //135度方向
+    for (let i = 0; i < 5; i++) {
+      let x = currentX - i;
+      let y = currentY - i;
+      let minX = Math.max(0, currentX - currentY);
+      let minY = Math.max(0, currentY - (currentX - minX));
+      let min = computeValue(minX, minY);
+      let maxX = Math.min(size - 1, currentX + size - currentY);
+      let maxY = Math.min(size - 1, currentY + (maxX - currentX));
+      let max = computeValue(maxX, maxY);
+      if (y >= 0 && x >= 0) {
+        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x + v, y + v)).filter((v, i) => {
+          if (v === step) {
+            return true;
+          }
+          let r = v >= min && v <= max;
+          if (i < num) {
+            r = r && ~current.pieces.indexOf(v);
+          } else {
+            r = r && !~others.pieces.indexOf(v);
+          }
+          return r;
+        });
+        if (hSteps.length === 5) {
           //胜利
           return true;
         }
