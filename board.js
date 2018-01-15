@@ -50,6 +50,18 @@
 
   /* 创建棋盘单元格 */
   function createUnit(v, x, y) {
+    let boundary = '';
+    let boundaryStyle = '';
+    if (x === 0) {
+      boundary = '<i class="board_boundary left"></i>';
+    } else if (x === gridUnitCount - 1) {
+      boundary = '<i class="board_boundary right"></i>';
+    }
+    if (y === 0) {
+      boundary += '<i class="board_boundary top"></i>';
+    } else if (y === gridUnitCount - 1) {
+      boundary += '<i class="board_boundary bottom"></i>';
+    }
     return (
       '<li class="' +
       unitClass +
@@ -59,7 +71,9 @@
       gridUnitWidth +
       'px;" data-value=' +
       v +
-      '><span></span></li>'
+      '><span></span>' +
+      boundary +
+      '</li>'
     );
   }
 
