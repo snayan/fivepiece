@@ -235,42 +235,42 @@
     }
     //自己能成四，则成四
     if (botCanFour.length) {
-      let best = bestStep(botCanFour, 4, botId);
+      let best = bestStep(botCanFour.filter(v => isWinOver(botId, v, 5, true)), 4, botId);
       if (best) {
         return best;
       }
     }
     //阻止人类成四
     if (humanCanFour.length) {
-      let best = bestStep(humanCanFour, 4, humanId);
+      let best = bestStep(humanCanFour.filter(v => isWinOver(humanId, v, 5, true)), 4, humanId);
       if (best) {
         return best;
       }
     }
     //阻止人类成三
     if (humanCanThree.length) {
-      let best = bestStep(humanCanThree, 3, humanId);
+      let best = bestStep(humanCanThree.filter(v => isWinOver(humanId, v, 5, true)), 3, humanId);
       if (best) {
         return best;
       }
     }
     //自己能成三，则成三
     if (botCanThree.length) {
-      let best = bestStep(botCanThree, 3, botId);
+      let best = bestStep(botCanThree.filter(v => isWinOver(botId, v, 5, true)), 3, botId);
       if (best) {
         return best;
       }
     }
     //阻止人类成二
     if (humanCanTow.length) {
-      let best = bestStep(humanCanTow, 2, humanId);
+      let best = bestStep(humanCanTow.filter(v => isWinOver(humanId, v, 5, true)), 2, humanId);
       if (best) {
         return best;
       }
     }
     //自己能成二，则成二
     if (botCanTow.length) {
-      let best = bestStep(botCanTow, 2, botId);
+      let best = bestStep(botCanTow.filter(v => isWinOver(botId, v, 5, true)), 2, botId);
       if (best) {
         return best;
       }
@@ -638,10 +638,11 @@
   }
 
   /* 判断是否胜利，结束 */
-  function isWinOver(who, step, num) {
+  function isWinOver(who, step, num, canWinOver = false) {
+    let havenBoardStatus = [...Bot.pieces, ...Human.pieces];
     let size = boardStatus.gridUnitCount;
     let current = who === Human.id ? Human : Bot;
-    if (current.pieces.length < num - 1) {
+    if (!canWinOver && current.pieces.length < num - 1) {
       return false;
     }
     let isWin = false;
@@ -656,7 +657,11 @@
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
           .map(v => computeValue(x + v, y))
-          .filter(v => v === step || (v >= min && v <= max && ~current.pieces.indexOf(v)));
+          .filter(
+            v =>
+              v === step ||
+              (v >= min && v <= max && (~current.pieces.indexOf(v) || (canWinOver && !~havenBoardStatus.indexOf(v))))
+          );
         if (hSteps.length === num) {
           //胜利
           return true;
@@ -673,7 +678,11 @@
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
           .map(v => computeValue(x, y + v))
-          .filter(v => v === step || (v >= min && v <= max && ~current.pieces.indexOf(v)));
+          .filter(
+            v =>
+              v === step ||
+              (v >= min && v <= max && (~current.pieces.indexOf(v) || (canWinOver && !~havenBoardStatus.indexOf(v))))
+          );
         if (hSteps.length === num) {
           //胜利
           return true;
@@ -694,7 +703,11 @@
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
           .map(v => computeValue(x - v, y + v))
-          .filter(v => v === step || (v >= min && v <= max && ~current.pieces.indexOf(v)));
+          .filter(
+            v =>
+              v === step ||
+              (v >= min && v <= max && (~current.pieces.indexOf(v) || (canWinOver && !~havenBoardStatus.indexOf(v))))
+          );
         if (hSteps.length === num) {
           //胜利
           return true;
@@ -715,7 +728,11 @@
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
           .map(v => computeValue(x + v, y + v))
-          .filter(v => v === step || (v >= min && v <= max && ~current.pieces.indexOf(v)));
+          .filter(
+            v =>
+              v === step ||
+              (v >= min && v <= max && (~current.pieces.indexOf(v) || (canWinOver && !~havenBoardStatus.indexOf(v))))
+          );
         if (hSteps.length === num) {
           //胜利
           return true;
@@ -766,6 +783,10 @@
   /* 获取所有可以走且可能获得胜利的棋 */
   function getCanWinStep(who) {
     let current = who === Human.id ? Human.pieces : Bot.pieces;
+    let havenBoardStatus = [...Human.pieces, ...Bot.pieces];
+    if (!current.length) {
+      return [...boardStatus.gridBoard].filter(v => !~havenBoardStatus.indexOf(v));
+    }
     return deduplicate(
       current
         .reduce((s, v) => [...s, ...stepRound(v)], [])
