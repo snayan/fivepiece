@@ -1,4 +1,3 @@
-
 button:focus {
   outline: 0;
 }
@@ -119,34 +118,19 @@ ul {
   color: #333333;
   z-index: 10;
 }
-.board_boundary{
-  position: absolute;
-  background:#CD8500;
-  z-index: 3;
-}
-.left{
-  top:0;
-  left: 0;
-  width: 50%;
-  height: 102%;
-}
-.right {
-  right: 0;
-  top: 0;
-  width: 50%;
-  height: 102%;
-}
-.top  {
-  top: 0;
+.left::before {
   left: 50%;
-  width: 102%;
-  height: 50%;
-  transform: translateX(-50%);
+  width: 50%;
 }
-.bottom{
-  bottom: 0;
-  left: 50%;
-  width: 102%;
+.right::before {
+  right: 50%;
+  width: 50%;
+}
+.top::after {
+  top: 50%;
   height: 50%;
-  transform: translateX(-50%);
+}
+.bottom::after {
+  bottom: 50%;
+  height: 50%;
 }
