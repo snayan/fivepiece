@@ -38,6 +38,7 @@ ul {
 .board_unit {
   float: left;
   position: relative;
+  cursor: pointer;
 }
 .board_unit::before {
   content: '';
