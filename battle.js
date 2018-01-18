@@ -233,408 +233,225 @@
     if (humanCanFive.length) {
       return humanCanFive[0];
     }
+    //计算可走的棋子
+    botCanFour = botCanFour.map(v => canWinOver(botId, v, 4)).filter(v => !!v);
+    botCanThree = botCanThree.map(v => canWinOver(botId, v, 3)).filter(v => !!v);
+    botCanTow = botCanTow.map(v => canWinOver(botId, v, 2)).filter(v => !!v);
+    humanCanFour = humanCanFour.map(v => canWinOver(humanId, v, 4)).filter(v => !!v);
+    humanCanThree = humanCanThree.map(v => canWinOver(humanId, v, 3)).filter(v => !!v);
+    humanCanTow = humanCanTow.map(v => canWinOver(humanId, v, 2)).filter(v => !!v);
+    //计算可走棋子的权重
+    botCanFour = computeWeight(botCanFour, 4, botId);
+    botCanThree = computeWeight(botCanThree, 3, botId);
+    botCanTow = computeWeight(botCanTow, 2, botId);
+    humanCanFour = computeWeight(humanCanFour, 4, humanId);
+    humanCanThree = computeWeight(humanCanThree, 3, humanId);
+    humanCanTow = computeWeight(humanCanTow, 2, humanId);
+
     //自己能成四，则成四
     if (botCanFour.length) {
-      let best = bestStep(botCanFour.filter(v => canWinOver(botId, v, 4)), 4, botId);
-      if (best != null) {
-        return best;
+      //成多个四
+      let best = botCanFour.reduce((s, v) => {
+        let vl = v.win.length;
+        let sl = s.win.length;
+        if (vl > sl) {
+          return v;
+        } else if (vl === sl && v.right >= s.right) {
+          return v;
+        } else {
+          return s;
+        }
+      });
+      if (best && best.win.length > 1) {
+        return best.current;
+      }
+      //成四阻四
+      if (humanCanFour.length) {
+        best = botCanFour.reduce((s, v) => {
+          let inHuman = humanCanFour.filter(hv => hv.current === v.current);
+          if (inHuman.length && v.right >= s.right) {
+            return v;
+          }
+          return s;
+        });
+      }
+      if (best && best.win.length) {
+        return best.current;
+      }
+      //成四阻三
+      if (humanCanThree.length) {
+        best = botCanFour.reduce((s, v) => {
+          let inHuman = humanCanThree.filter(hv => hv.current === v.current);
+          if (inHuman.length && v.right >= s.right) {
+            return v;
+          }
+          return s;
+        });
+      }
+      if (best && best.win.length) {
+        return best.current;
+      }
+      //成四
+      best = botCanFour.reduce((s, v) => {
+        return v.right >= s.right ? v : s;
+      });
+      if (best && best.win.length) {
+        return best.current;
       }
     }
     //阻止人类成四
     if (humanCanFour.length) {
-      let best = bestStep(humanCanFour.filter(v => canWinOver(humanId, v, 4)), 4, humanId);
-      if (best != null) {
-        return best;
+      //成多个四
+      let best = humanCanFour.reduce((s, v) => {
+        let vl = v.win.length;
+        let sl = s.win.length;
+        if (vl > sl) {
+          return v;
+        } else if (vl === sl && v.right >= s.right) {
+          return v;
+        } else {
+          return s;
+        }
+      });
+      if (best && best.win.length > 1) {
+        return best.current;
       }
-    }
-    //阻止人类成三
-    if (humanCanThree.length) {
-      let best = bestStep(humanCanThree.filter(v => canWinOver(humanId, v, 3)), 3, humanId);
-      if (best != null) {
-        return best;
+      //成四
+      best = humanCanFour.reduce((s, v) => {
+        return v.right >= s.right ? v : s;
+      });
+      if (best && best.win.length) {
+        return best.current;
       }
     }
     //自己能成三，则成三
     if (botCanThree.length) {
-      let best = bestStep(botCanThree.filter(v => canWinOver(botId, v, 3)), 3, botId);
-      if (best != null) {
-        return best;
+      //成多个三
+      let best = botCanThree.reduce((s, v) => {
+        let vl = v.win.length;
+        let sl = s.win.length;
+        if (vl > sl) {
+          return v;
+        } else if (vl === sl && v.right >= s.right) {
+          return v;
+        } else {
+          return s;
+        }
+      });
+      if (best && best.win.length > 1) {
+        return best.current;
+      }
+      //成三阻三
+      if (humanCanThree.length) {
+        best = botCanThree.reduce((s, v) => {
+          let inHuman = humanCanThree.filter(hv => hv.current === v.current);
+          if (inHuman.length && v.right >= s.right) {
+            return v;
+          }
+          return s;
+        });
+      }
+      if (best && best.win.length) {
+        return best.current;
+      }
+      //成三
+      best = botCanThree.reduce((s, v) => {
+        return v.right >= s.right ? v : s;
+      });
+      if (best && best.win.length) {
+        return best.current;
       }
     }
-    //阻止人类成二
-    if (humanCanTow.length) {
-      let best = bestStep(humanCanTow.filter(v => canWinOver(humanId, v, 2)), 2, humanId);
-      if (best != null) {
-        return best;
+    //阻止人类成三
+    if (humanCanThree.length) {
+      //成多个三
+      let best = humanCanThree.reduce((s, v) => {
+        let vl = v.win.length;
+        let sl = s.win.length;
+        if (vl > sl) {
+          return v;
+        } else if (vl === sl && v.right >= s.right) {
+          return v;
+        } else {
+          return s;
+        }
+      });
+      if (best && best.win.length > 1) {
+        return best.current;
+      }
+      //成三
+      best = humanCanThree.reduce((s, v) => {
+        return v.right >= s.right ? v : s;
+      });
+      if (best && best.win.length) {
+        return best.current;
       }
     }
     //自己能成二，则成二
     if (botCanTow.length) {
-      let best = bestStep(botCanTow.filter(v => canWinOver(botId, v, 2)), 2, botId);
-      if (best != null) {
-        return best;
+      //成多个二
+      let best = botCanTow.reduce((s, v) => {
+        let vl = v.win.length;
+        let sl = s.win.length;
+        if (vl > sl) {
+          return v;
+        } else if (vl === sl && v.right >= s.right) {
+          return v;
+        } else {
+          return s;
+        }
+      });
+      if (best && best.win.length > 1) {
+        return best.current;
+      }
+      //成二阻二
+      if (humanCanTow.length) {
+        best = botCanTow.reduce((s, v) => {
+          let inHuman = humanCanTow.filter(hv => hv.current === v.current);
+          if (inHuman.length && v.right >= s.right) {
+            return v;
+          }
+          return s;
+        });
+      }
+      if (best && best.win.length) {
+        return best.current;
+      }
+      //成二
+      best = humanCanTow.reduce((s, v) => {
+        return v.right >= s.right ? v : s;
+      });
+      if (best && best.win.length) {
+        return best.current;
+      }
+    }
+    //阻止人类成二
+    if (humanCanTow.length) {
+      //成多个二
+      let best = humanCanTow.reduce((s, v) => {
+        let vl = v.win.length;
+        let sl = s.win.length;
+        if (vl > sl) {
+          return v;
+        } else if (vl === sl && v.right >= s.right) {
+          return v;
+        } else {
+          return s;
+        }
+      });
+      if (best && best.win.length > 1) {
+        return best.current;
+      }
+      //成二
+      best = humanCanTow.reduce((s, v) => {
+        return v.right >= s.right ? v : s;
+      });
+      if (best && best.win.length) {
+        return best.current;
       }
     }
     //否则，随机走一步可以走的棋子
     return botCanSteps[getRandom(0, botCanSteps.length - 1)];
-  }
-
-  /* 算出最优的一个位置 */
-  function bestStep(steps, num, who) {
-    let havenBoardStatus = [...Bot.pieces, ...Human.pieces];
-    let boardMin = boardStatus.gridBoard[0];
-    let boardMax = boardStatus.gridBoard.slice(-1)[0];
-    let size = boardStatus.gridUnitCount;
-    let current = who === Bot.id ? Bot.pieces : Human.pieces;
-    let target, rounds, value, maxValue;
-    if (!Array.isArray(steps) || !steps.length) {
-      return null;
-    }
-    let store = new Map();
-    for (let s of steps) {
-      let [x, y] = computeXY(s);
-      let min, max, minX, minY, maxX, maxY, targetX, targetY, iPosition, iIndex, iFlag;
-      value = 0;
-      maxValue = 0;
-      //水平方向
-      min = Math.max(computeValue(0, y), boardMin);
-      max = Math.min(computeValue(size - 1, y), boardMax);
-      iIndex = num;
-      while (iIndex) {
-        targetX = Math.min(x + num - 1 - iIndex, size - 1);
-        target = computeValue(targetX, y);
-        if (target === s || (target >= min && target <= max && ~current.indexOf(target))) {
-          iPosition = num - 2;
-          iFlag = true;
-          while (iPosition > 0 && iFlag) {
-            iFlag = target === s || ~current.indexOf(computeValue(targetX - iPosition, y));
-            iPosition = iPosition - 1;
-          }
-          if (iFlag) {
-            value = 0;
-            rounds =
-              stepRound(target)
-                .map(([x, y]) => computeValue(x, y))
-                .filter(v => ~current.indexOf(v)).length + 1;
-            let left = computeValue(x - 1, y);
-            let right = computeValue(targetX + 1, y);
-            if (left >= min) {
-              if (~current.indexOf(left)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(left)) {
-                value += 1;
-              }
-            }
-            if (right <= max) {
-              if (~current.indexOf(right)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(right)) {
-                value += 1;
-              }
-            }
-            maxValue = Math.max(maxValue, value + rounds);
-          }
-        }
-        iIndex = iIndex - 1;
-      }
-      iIndex = num;
-      while (iIndex) {
-        targetX = Math.max(0, x - num + 1 + iIndex);
-        target = computeValue(targetX, y);
-        if (target === s || (target >= min && target <= max && ~current.indexOf(target))) {
-          iPosition = num - 2;
-          iFlag = true;
-          while (iPosition > 0 && iFlag) {
-            iFlag = target === s || ~current.indexOf(computeValue(targetX + iPosition, y));
-            iPosition = iPosition - 1;
-          }
-          if (iFlag) {
-            value = 0;
-            rounds =
-              stepRound(target)
-                .map(([x, y]) => computeValue(x, y))
-                .filter(v => ~current.indexOf(v)).length + 1;
-            let left = computeValue(targetX - 1, y);
-            let right = computeValue(x + 1, y);
-            if (left >= min) {
-              if (~current.indexOf(left)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(left)) {
-                value += 1;
-              }
-            }
-            if (right <= max) {
-              if (~current.indexOf(right)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(right)) {
-                value += 1;
-              }
-            }
-            maxValue = Math.max(maxValue, value + rounds);
-          }
-        }
-        iIndex = iIndex - 1;
-      }
-
-      //垂直方向
-      min = Math.max(computeValue(x, 0), boardMin);
-      max = Math.min(computeValue(x, size - 1), boardMax);
-      iIndex = num;
-      while (iIndex) {
-        targetY = Math.min(size - 1, y + num - 1 - iIndex);
-        target = computeValue(x, targetY);
-        if (target === s || (target >= min && target <= max && ~current.indexOf(target))) {
-          iPosition = num - 2;
-          iFlag = true;
-          while (iPosition > 0 && iFlag) {
-            iFlag = target === s || ~current.indexOf(computeValue(x, targetY - iPosition));
-            iPosition = iPosition - 1;
-          }
-          if (iFlag) {
-            value = 0;
-            rounds =
-              stepRound(target)
-                .map(([x, y]) => computeValue(x, y))
-                .filter(v => ~current.indexOf(v)).length + 1;
-            let up = computeValue(x, y - 1);
-            let down = computeValue(x, targetY + 1);
-            if (up >= min) {
-              if (~current.indexOf(up)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(up)) {
-                value += 1;
-              }
-            }
-            if (down <= max) {
-              if (~current.indexOf(down)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(down)) {
-                value += 1;
-              }
-            }
-            maxValue = Math.max(maxValue, value + rounds);
-          }
-        }
-        iIndex = iIndex - 1;
-      }
-      iIndex = num;
-      while (iIndex) {
-        targetY = Math.max(y - num + 1 + iIndex, 0);
-        target = computeValue(x, targetY);
-        if (target === s || (target >= min && target <= max && ~current.indexOf(target))) {
-          iPosition = num - 2;
-          iFlag = true;
-          while (iPosition > 0 && iFlag) {
-            iFlag = target === s || ~current.indexOf(computeValue(x, targetY + iPosition));
-            iPosition = iPosition - 1;
-          }
-          if (iFlag) {
-            value = 0;
-            rounds =
-              stepRound(target)
-                .map(([x, y]) => computeValue(x, y))
-                .filter(v => ~current.indexOf(v)).length + 1;
-            let up = computeValue(x, targetY - 1);
-            let down = computeValue(x, y + 1);
-            if (up >= min) {
-              if (~current.indexOf(up)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(up)) {
-                value += 1;
-              }
-            }
-            if (down <= max) {
-              if (~current.indexOf(down)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(down)) {
-                value += 1;
-              }
-            }
-            maxValue = Math.max(maxValue, value + rounds);
-          }
-        }
-        iIndex = iIndex - 1;
-      }
-
-      //45度方向
-      minX = Math.min(size - 1, x + y);
-      minY = y - (minX - x);
-      min = Math.max(computeValue(minX, minY), boardMin);
-      maxY = Math.min(size - 1, x + y);
-      maxX = x - (maxY - y);
-      max = Math.min(computeValue(maxX, maxY), boardMax);
-      iIndex = num;
-      while (iIndex) {
-        targetX = Math.max(0, x - num + 1 + iIndex);
-        targetY = Math.min(size - 1, y + num - 1 - iIndex);
-        target = computeValue(targetX, targetY);
-        if (target === s || (target >= min && target <= max && ~current.indexOf(target))) {
-          iPosition = num - 2;
-          iFlag = true;
-          while (iPosition > 0 && iFlag) {
-            iFlag = target === s || ~current.indexOf(computeValue(targetX + iPosition, targetY - iPosition));
-            iPosition = iPosition - 1;
-          }
-          if (iFlag) {
-            value = 0;
-            rounds =
-              stepRound(target)
-                .map(([x, y]) => computeValue(x, y))
-                .filter(v => ~current.indexOf(v)).length + 1;
-            let rightUp = computeValue(x + 1, y + 1);
-            let leftDown = computeValue(targetX - 1, targetY - 1);
-            if (rightUp >= min) {
-              if (~current.indexOf(rightUp)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(rightUp)) {
-                value += 1;
-              }
-            }
-            if (leftDown <= max) {
-              if (~current.indexOf(leftDown)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(leftDown)) {
-                value += 1;
-              }
-            }
-            maxValue = Math.max(maxValue, value + rounds);
-          }
-        }
-        iIndex = iIndex - 1;
-      }
-      iIndex = num;
-      while (iIndex) {
-        targetX = Math.min(size - 1, x + num - 1 - iIndex);
-        targetY = Math.max(0, y - num + 1 + iIndex);
-        target = computeValue(targetX, targetY);
-        if (target === s || (target >= min && target <= max && ~current.indexOf(target))) {
-          iPosition = num - 2;
-          iFlag = true;
-          while (iPosition > 0 && iFlag) {
-            iFlag = target === s || ~current.indexOf(computeValue(targetX - iPosition, targetY + iPosition));
-            iPosition = iPosition - 1;
-          }
-          if (iFlag) {
-            value = 0;
-            rounds =
-              stepRound(target)
-                .map(([x, y]) => computeValue(x, y))
-                .filter(v => ~current.indexOf(v)).length + 1;
-            let rightUp = computeValue(targetX + 1, targetY - 1);
-            let leftDown = computeValue(x - 1, y + 1);
-            if (rightUp >= min) {
-              if (~current.indexOf(rightUp)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(rightUp)) {
-                value += 1;
-              }
-            }
-            if (leftDown <= max) {
-              if (~current.indexOf(leftDown)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(leftDown)) {
-                value += 1;
-              }
-            }
-            maxValue = Math.max(maxValue, value + rounds);
-          }
-        }
-        iIndex = iIndex - 1;
-      }
-
-      //135度方向
-      minX = Math.max(0, x - y);
-      minY = y - (x - minX);
-      min = Math.max(computeValue(minX, minY), boardMin);
-      maxX = Math.min(size - 1, x + size - y);
-      maxY = y + (maxX - x);
-      max = Math.min(computeValue(maxX, maxY), boardMax);
-      iIndex = num;
-      while (iIndex) {
-        targetX = Math.min(size - 1, x + num - 1 - iIndex);
-        targetY = Math.min(size - 1, y + num - 1 - iIndex);
-        target = computeValue(targetX, targetY);
-        if (target === s || (target >= min && target <= max && ~current.indexOf(target))) {
-          iPosition = num - 2;
-          iFlag = true;
-          while (iPosition > 0 && iFlag) {
-            iFlag = target === s || ~current.indexOf(computeValue(targetX - iPosition, targetY - iPosition));
-            iPosition = iPosition - 1;
-          }
-          if (iFlag) {
-            value = 0;
-            rounds =
-              stepRound(target)
-                .map(([x, y]) => computeValue(x, y))
-                .filter(v => ~current.indexOf(v)).length + 1;
-            let leftUp = computeValue(x - 1, y - 1);
-            let rightDown = computeValue(targetX + 1, targetY + 1);
-            if (leftUp >= min) {
-              if (~current.indexOf(leftUp)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(leftUp)) {
-                value += 1;
-              }
-            }
-            if (rightDown <= max) {
-              if (~current.indexOf(rightDown)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(rightDown)) {
-                value += 1;
-              }
-            }
-            maxValue = Math.max(maxValue, value + rounds);
-          }
-        }
-        iIndex = iIndex - 1;
-      }
-      iIndex = num;
-      while (iIndex) {
-        targetX = Math.max(0, x - num + 1 + iIndex);
-        targetY = Math.max(0, y - num + 1 + iIndex);
-        target = computeValue(targetX, targetY);
-        if (target === s || (target >= min && target <= max && ~current.indexOf(target))) {
-          iPosition = num - 2;
-          iFlag = true;
-          while (iPosition > 0 && iFlag) {
-            iFlag = target === s || ~current.indexOf(computeValue(targetX + iPosition, targetY + iPosition));
-            iPosition = iPosition - 1;
-          }
-          if (iFlag) {
-            value = 0;
-            rounds =
-              stepRound(target)
-                .map(([x, y]) => computeValue(x, y))
-                .filter(v => ~current.indexOf(v)).length + 1;
-            let leftUp = computeValue(targetX - 1, targetY - 1);
-            let rightDown = computeValue(x + 1, y + 1);
-            if (leftUp >= min) {
-              if (~current.indexOf(leftUp)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(leftUp)) {
-                value += 1;
-              }
-            }
-            if (rightDown <= max) {
-              if (~current.indexOf(rightDown)) {
-                value += 10;
-              } else if (!~havenBoardStatus.indexOf(rightDown)) {
-                value += 1;
-              }
-            }
-            maxValue = Math.max(maxValue, value + rounds);
-          }
-        }
-        iIndex = iIndex - 1;
-      }
-
-      store.set(s, maxValue);
-    }
-    let r = Array.from(store).filter(([k, s]) => s > 0);
-    if (r.length) {
-      return r.sort((a, b) => a[1] < b[1])[0][0];
-    }
-    return null;
   }
 
   /* 判断是否胜利，结束 */
@@ -650,8 +467,7 @@
     for (let i = 0; i < num; i++) {
       let x = currentX - i;
       let y = currentY;
-      let min = computeValue(0, currentY);
-      let max = computeValue(size - 1, currentY);
+      let [min, max] = minMaxHorizontal(x, y);
       if (x >= 0) {
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
@@ -667,8 +483,7 @@
     for (let i = 0; i < num; i++) {
       let x = currentX;
       let y = currentY - i;
-      let min = computeValue(currentX, 0);
-      let max = computeValue(currentX, size - 1);
+      let [min, max] = minMaxVertical(x, y);
       if (y >= 0) {
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
@@ -684,12 +499,7 @@
     for (let i = 0; i < num; i++) {
       let x = currentX + i;
       let y = currentY - i;
-      let minX = Math.min(size - 1, currentX + currentY);
-      let minY = Math.max(0, currentY - (minX - currentX));
-      let min = computeValue(minX, minY);
-      let maxY = Math.min(size - 1, currentX + currentY);
-      let maxX = Math.max(0, currentX - (maxY - currentY));
-      let max = computeValue(maxX, maxY);
+      let [min, max] = minMax45Degree(x, y);
       if (y >= 0 && x <= size - 1) {
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
@@ -705,12 +515,7 @@
     for (let i = 0; i < num; i++) {
       let x = currentX - i;
       let y = currentY - i;
-      let minX = Math.max(0, currentX - currentY);
-      let minY = Math.max(0, currentY - (currentX - minX));
-      let min = computeValue(minX, minY);
-      let maxX = Math.min(size - 1, currentX + size - currentY);
-      let maxY = Math.min(size - 1, currentY + (maxX - currentX));
-      let max = computeValue(maxX, maxY);
+      let [min, max] = minMax135degree(x, y);
       if (y >= 0 && x >= 0) {
         let hSteps = [0, 1, 2, 3, 4]
           .slice(0, num)
@@ -725,34 +530,31 @@
     return false;
   }
 
-  /* 判断该子能否为以后提供胜利的基础 */
+  /* 该子能否为以后提供胜利的基础 */
   function canWinOver(who, step, num) {
     let size = boardStatus.gridUnitCount;
-    let current = who === Human.id ? Human : Bot;
-    let others = who === Human.id ? Bot : Human;
     let [currentX, currentY] = computeXY(step);
+    let result = [];
     //水平方向
     for (let i = 0; i < 5; i++) {
       let x = currentX - i;
       let y = currentY;
-      let min = computeValue(0, currentY);
-      let max = computeValue(size - 1, currentY);
+      let [min, max] = minMaxHorizontal(x, y);
       if (x >= 0) {
-        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x + v, y)).filter((v, i) => {
-          if (v === step) {
-            return true;
-          }
-          let r = v >= min && v <= max;
-          if (i < num) {
-            r = r && ~current.pieces.indexOf(v);
-          } else {
-            r = r && !~others.pieces.indexOf(v);
-          }
-          return r;
-        });
+        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x + v, y));
+        hSteps = ifCanWinOver(hSteps, step, min, max, num, who);
         if (hSteps.length === 5) {
           //胜利
-          return true;
+          hSteps = computeLine(hSteps, step, who);
+          let hsMinX = 0;
+          let hsMaxX = 0;
+          if (hSteps.length) {
+            hsMinX = computeXY(hSteps[0])[0];
+            hsMaxX = computeXY(hSteps[hSteps.length - 1])[0];
+          }
+          if (Math.abs(hsMaxX - hsMinX) < num) {
+            result.push({ direction: '水平方向', steps: hSteps });
+          }
         }
       }
     }
@@ -760,24 +562,22 @@
     for (let i = 0; i < 5; i++) {
       let x = currentX;
       let y = currentY - i;
-      let min = computeValue(currentX, 0);
-      let max = computeValue(currentX, size - 1);
+      let [min, max] = minMaxVertical(x, y);
       if (y >= 0) {
-        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x, y + v)).filter((v, i) => {
-          if (v === step) {
-            return true;
-          }
-          let r = v >= min && v <= max;
-          if (i < num) {
-            r = r && ~current.pieces.indexOf(v);
-          } else {
-            r = r && !~others.pieces.indexOf(v);
-          }
-          return r;
-        });
+        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x, y + v));
+        hSteps = ifCanWinOver(hSteps, step, min, max, num, who);
         if (hSteps.length === 5) {
           //胜利
-          return true;
+          hSteps = computeLine(hSteps, step, who);
+          let hsMinY = 0;
+          let hsMaxY = 0;
+          if (hSteps.length) {
+            hsMinY = computeXY(hSteps[0])[1];
+            hsMaxY = computeXY(hSteps[hSteps.length - 1])[1];
+          }
+          if (Math.abs(hsMaxY - hsMinY) < num) {
+            result.push({ direction: '垂直方向', steps: hSteps });
+          }
         }
       }
     }
@@ -785,28 +585,22 @@
     for (let i = 0; i < 5; i++) {
       let x = currentX + i;
       let y = currentY - i;
-      let minX = Math.min(size - 1, currentX + currentY);
-      let minY = Math.max(0, currentY - (minX - currentX));
-      let min = computeValue(minX, minY);
-      let maxY = Math.min(size - 1, currentX + currentY);
-      let maxX = Math.max(0, currentX - (maxY - currentY));
-      let max = computeValue(maxX, maxY);
+      let [min, max] = minMax45Degree(x, y);
       if (y >= 0 && x <= size - 1) {
-        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x - v, y + v)).filter((v, i) => {
-          if (v === step) {
-            return true;
-          }
-          let r = v >= min && v <= max;
-          if (i < num) {
-            r = r && ~current.pieces.indexOf(v);
-          } else {
-            r = r && !~others.pieces.indexOf(v);
-          }
-          return r;
-        });
+        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x - v, y + v));
+        hSteps = ifCanWinOver(hSteps, step, min, max, num, who);
         if (hSteps.length === 5) {
           //胜利
-          return true;
+          hSteps = computeLine(hSteps, step, who);
+          let hsMinY = 0;
+          let hsMaxY = 0;
+          if (hSteps.length) {
+            hsMinY = computeXY(hSteps[0])[1];
+            hsMaxY = computeXY(hSteps[hSteps.length - 1])[1];
+          }
+          if (Math.abs(hsMaxY - hsMinY) < num) {
+            result.push({ direction: '45度方向', steps: hSteps });
+          }
         }
       }
     }
@@ -814,49 +608,148 @@
     for (let i = 0; i < 5; i++) {
       let x = currentX - i;
       let y = currentY - i;
-      let minX = Math.max(0, currentX - currentY);
-      let minY = Math.max(0, currentY - (currentX - minX));
-      let min = computeValue(minX, minY);
-      let maxX = Math.min(size - 1, currentX + size - currentY);
-      let maxY = Math.min(size - 1, currentY + (maxX - currentX));
-      let max = computeValue(maxX, maxY);
+      let [min, max] = minMax135degree(x, y);
       if (y >= 0 && x >= 0) {
-        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x + v, y + v)).filter((v, i) => {
-          if (v === step) {
-            return true;
-          }
-          let r = v >= min && v <= max;
-          if (i < num) {
-            r = r && ~current.pieces.indexOf(v);
-          } else {
-            r = r && !~others.pieces.indexOf(v);
-          }
-          return r;
-        });
+        let hSteps = [0, 1, 2, 3, 4].map(v => computeValue(x + v, y + v));
+        hSteps = ifCanWinOver(hSteps, step, min, max, num, who);
         if (hSteps.length === 5) {
           //胜利
-          return true;
+          hSteps = computeLine(hSteps, step, who);
+          let hsMinY = 0;
+          let hsMaxY = 0;
+          if (hSteps.length) {
+            hsMinY = computeXY(hSteps[0])[1];
+            hsMaxY = computeXY(hSteps[hSteps.length - 1])[1];
+          }
+          if (Math.abs(hsMaxY - hsMinY) < num) {
+            result.push({ direction: '135度方向', steps: hSteps });
+          }
         }
       }
     }
-    return false;
+    return result.length
+      ? { current: step, win: deduplicate(result, (s, v) => !arrayInArray(s.map(v => v.steps), v.steps)) }
+      : null;
+  }
+
+  /* 判断该子能否为以后提供胜利的基础 */
+  function ifCanWinOver(steps, step, min, max, num, who) {
+    let current = who === Human.id ? Human : Bot;
+    let others = who === Human.id ? Bot : Human;
+    let includes = 0;
+    steps = steps.filter((v, i) => {
+      if (v === step) {
+        includes += 1;
+        return true;
+      }
+      let r = v >= min && v <= max;
+      r = r && (~current.pieces.indexOf(v) || !~others.pieces.indexOf(v));
+      if (~current.pieces.indexOf(v)) {
+        includes += 1;
+      }
+      return r;
+    });
+    return includes === num ? steps : [];
+  }
+
+  /* 计算连线 */
+  function computeLine(steps, step, who) {
+    let current = who === Human.id ? Human.pieces : Bot.pieces;
+    return steps.filter(v => v === step || ~current.indexOf(v));
   }
 
   /* 计算权重 */
-  function computeWeight(x, y, num) {
-    let value = 0;
+  function computeWeight(steps, num, who) {
+    let havenBoardStatus = [...Bot.pieces, ...Human.pieces];
+    let currents = who === Human.id ? Human.pieces : Bot.pieces;
+    let winLen, winSteps, winMin, winMax, winDir, winWeight, lineMin, lineMax, outerMin, outerMax;
+    return steps.map(step => {
+      currentStep = step.current;
+      let right = step.win.reduce((s, w) => {
+        winWeight = 0;
+        winDir = w.direction;
+        winSteps = w.steps;
+        winLen = winSteps.length;
+        winMin = winSteps[0];
+        winMax = winSteps[winLen - 1];
+        let [minX, minY] = computeXY(winMin);
+        let [maxX, maxY] = computeXY(winMax);
+        if (winDir === '水平方向') {
+          [lineMin, lineMax] = minMaxHorizontal(minX, maxY);
+          outerMin = computeValue(minX - 1, minY);
+          outerMax = computeValue(maxX + 1, maxY);
+        } else if (winDir === '垂直方向') {
+          [lineMin, lineMax] = minMaxVertical(minX, minY);
+          outerMin = computeValue(minX, minY - 1);
+          outerMax = computeValue(maxX, maxY + 1);
+        } else if (winDir === '45度方向') {
+          [lineMin, lineMax] = minMax45Degree(minX, minY);
+          outerMin = computeValue(minX + 1, minY - 1);
+          outerMax = computeValue(maxX - 1, maxY + 1);
+        } else if (winDir === '135度方向') {
+          [lineMin, lineMax] = minMax135degree(minX, minY);
+          outerMin = computeValue(minX - 1, minY - 1);
+          outerMax = computeValue(maxX + 1, maxY + 1);
+        }
+        if (outerMin >= lineMin && outerMin <= lineMax) {
+          if (~currents.indexOf(outerMin)) {
+            winWeight += 10;
+          } else if (!~havenBoardStatus.indexOf(outerMin)) {
+            winWeight += 1;
+          }
+        }
+        if (outerMax >= lineMin && outerMax <= lineMax) {
+          if (~currents.indexOf(outerMax)) {
+            winWeight += 10;
+          } else if (!~havenBoardStatus.indexOf(outerMax)) {
+            winWeight += 1;
+          }
+        }
+        return s + winWeight;
+      }, 0);
+      step['right'] = right;
+      return step;
+    });
+  }
+
+  /* 当前坐标的水平方向的最大最小值 */
+  function minMaxHorizontal(x, y) {
     let size = boardStatus.gridUnitCount;
     let min = computeValue(0, y);
     let max = computeValue(size - 1, y);
-    let left = computeValue(x - 1, y);
-    let right = computeValue(x + num - 1 + 1, y);
-    if (left >= min) {
-      value = value + 1;
-    }
-    if (right <= max) {
-      value = value + 1;
-    }
-    return value;
+    return [min, max];
+  }
+
+  /* 当前坐标的垂直方向的最大最小值 */
+  function minMaxVertical(x, y) {
+    let size = boardStatus.gridUnitCount;
+    let min = computeValue(x, 0);
+    let max = computeValue(x, size - 1);
+    return [min, max];
+  }
+
+  /* 当前坐标的45度方向最大最小值 */
+  function minMax45Degree(x, y) {
+    let size = boardStatus.gridUnitCount;
+    let minX = Math.min(size - 1, x + y);
+    let minY = Math.max(0, y - (minX - x));
+    let min = computeValue(minX, minY);
+    let maxY = Math.min(size - 1, x + y);
+    let maxX = Math.max(0, x - (maxY - y));
+    let max = computeValue(maxX, maxY);
+    return [min, max];
+  }
+
+  /* 当前坐标的135度方向最大最小值 */
+  function minMax135degree(x, y) {
+    let size = boardStatus.gridUnitCount;
+    let minX = Math.max(0, x - y);
+    let minY = Math.max(0, y - (x - minX));
+    let min = computeValue(minX, minY);
+    let maxX = Math.min(size - 1, x + size - y);
+    let maxY = Math.min(size - 1, y + (maxX - x));
+    let max = computeValue(maxX, maxY);
+    return [min, max];
   }
 
   /* 该棋子四周坐标 */
@@ -891,13 +784,26 @@
       current
         .reduce((s, v) => [...s, ...stepRound(v)], [])
         .map(v => computeValue(v[0], v[1]))
-        .filter(v => !~havenBoardStatus.indexOf(v))
-    ).sort((a, b) => a < b);
+        .filter(v => !~havenBoardStatus.indexOf(v)),
+      (s, v) => !~s.indexOf(v)
+    );
   }
 
   /* 数组去重 */
-  function deduplicate(d) {
-    return Array.from(new Set(d));
+  function deduplicate(d, fn) {
+    return d.reduce((s, v) => {
+      return fn(s, v) ? [...s, v] : s;
+    }, []);
+    // return Array.from(new Set(d));
+  }
+
+  /* 判断数组是否包含数组 */
+  function arrayInArray(s, d) {
+    return s.filter(sv => {
+      let r = sv.length === d.length;
+      r = r && d.reduce((s, v) => s && ~sv.indexOf(v), true);
+      return r;
+    }).length;
   }
 
   /* 获取随机值 */
