@@ -267,26 +267,48 @@
       }
       //成四阻四
       if (humanCanFour.length) {
-        best = botCanFour.reduce((s, v) => {
-          let inHuman = humanCanFour.filter(hv => hv.current === v.current);
-          if (inHuman.length && v.right >= s.right) {
-            return v;
-          }
-          return s;
-        });
+        best = botCanFour.reduce(
+          (s, v) => {
+            let inHuman = humanCanFour.filter(hv => hv.current === v.current);
+            if (inHuman.length && v.right >= s.right) {
+              return v;
+            }
+            return s;
+          },
+          { right: -1, win: [] }
+        );
+      }
+      if (best && best.win.length) {
+        return best.current;
+      }
+      //成四成三
+      if (botCanThree.length) {
+        best = botCanFour.reduce(
+          (s, v) => {
+            let inBot = botCanThree.filter(hv => hv.current === v.current);
+            if (inBot.length && v.right >= s.right) {
+              return v;
+            }
+            return s;
+          },
+          { right: -1, win: [] }
+        );
       }
       if (best && best.win.length) {
         return best.current;
       }
       //成四阻三
       if (humanCanThree.length) {
-        best = botCanFour.reduce((s, v) => {
-          let inHuman = humanCanThree.filter(hv => hv.current === v.current);
-          if (inHuman.length && v.right >= s.right) {
-            return v;
-          }
-          return s;
-        });
+        best = botCanFour.reduce(
+          (s, v) => {
+            let inHuman = humanCanThree.filter(hv => hv.current === v.current);
+            if (inHuman.length && v.right >= s.right) {
+              return v;
+            }
+            return s;
+          },
+          { right: -1, win: [] }
+        );
       }
       if (best && best.win.length) {
         return best.current;
@@ -295,13 +317,13 @@
       best = botCanFour.reduce((s, v) => {
         return v.right >= s.right ? v : s;
       });
-      if (best && best.win.length) {
+      if (best && best.right > 1 && best.win.length) {
         return best.current;
       }
     }
     //阻止人类成四
     if (humanCanFour.length) {
-      //成多个四
+      //成四成四
       let best = humanCanFour.reduce((s, v) => {
         let vl = v.win.length;
         let sl = s.win.length;
@@ -315,6 +337,38 @@
       });
       if (best && best.win.length > 1) {
         return best.current;
+      }
+      //成四成三
+      if (humanCanThree.length) {
+        best = humanCanFour.reduce(
+          (s, v) => {
+            let inHuman = humanCanThree.filter(hv => hv.current === v.current);
+            if (inHuman.length && v.right >= s.right) {
+              return v;
+            }
+            return s;
+          },
+          { right: -1, win: [] }
+        );
+        if (best && best.win.length) {
+          return best.current;
+        }
+      }
+      //成四成二
+      if (humanCanTow.length) {
+        best = humanCanFour.reduce(
+          (s, v) => {
+            let inHuman = humanCanTow.filter(hv => hv.current === v.current);
+            if (inHuman.length && v.right >= s.right) {
+              return v;
+            }
+            return s;
+          },
+          { right: -1, win: [] }
+        );
+        if (best && best.win.length) {
+          return best.current;
+        }
       }
       //成四
       best = humanCanFour.reduce((s, v) => {
@@ -343,22 +397,34 @@
       }
       //成三阻三
       if (humanCanThree.length) {
-        best = botCanThree.reduce((s, v) => {
-          let inHuman = humanCanThree.filter(hv => hv.current === v.current);
-          if (inHuman.length && v.right >= s.right) {
-            return v;
-          }
-          return s;
-        });
+        best = botCanThree.reduce(
+          (s, v) => {
+            let inHuman = humanCanThree.filter(hv => hv.current === v.current);
+            if (inHuman.length && v.right >= s.right) {
+              return v;
+            }
+            return s;
+          },
+          { right: -1, win: [] }
+        );
       }
       if (best && best.win.length) {
         return best.current;
+      }
+      //成四
+      if (botCanFour.length) {
+        best = botCanFour.reduce((s, v) => {
+          return v.right >= s.right ? v : s;
+        });
+        if (best && best.win.length) {
+          return best.current;
+        }
       }
       //成三
       best = botCanThree.reduce((s, v) => {
         return v.right >= s.right ? v : s;
       });
-      if (best && best.win.length) {
+      if (best && best.right > 1 && best.win.length) {
         return best.current;
       }
     }
@@ -378,6 +444,22 @@
       });
       if (best && best.win.length > 1) {
         return best.current;
+      }
+      //成三
+      best = humanCanThree.reduce((s, v) => {
+        return v.right >= s.right ? v : s;
+      });
+      if (best && best.right > 1 && best.win.length) {
+        return best.current;
+      }
+      //成三
+      if (botCanThree.length) {
+        best = botCanThree.reduce((s, v) => {
+          return v.right >= s.right ? v : s;
+        });
+        if (best && best.win.length) {
+          return best.current;
+        }
       }
       //成三
       best = humanCanThree.reduce((s, v) => {
@@ -406,13 +488,16 @@
       }
       //成二阻二
       if (humanCanTow.length) {
-        best = botCanTow.reduce((s, v) => {
-          let inHuman = humanCanTow.filter(hv => hv.current === v.current);
-          if (inHuman.length && v.right >= s.right) {
-            return v;
-          }
-          return s;
-        });
+        best = botCanTow.reduce(
+          (s, v) => {
+            let inHuman = humanCanTow.filter(hv => hv.current === v.current);
+            if (inHuman.length && v.right >= s.right) {
+              return v;
+            }
+            return s;
+          },
+          { right: -1, win: [] }
+        );
       }
       if (best && best.win.length) {
         return best.current;
