@@ -84,7 +84,7 @@ dom交互部分比较简单，这里就不说了，只说说人机对战的逻�
 
 写完了之后，反正我自己是很难赢这个机器人了，界面效果图如下：
 
-![](/Users/zhangyang/Downloads/fivepiece.png)
+![](./fivepiece.png)
 
 如果想挑战一下的可以开始：[https://snayan.github.io/fivepiece/](https://snayan.github.io/fivepiece/)
 
